@@ -77,7 +77,11 @@ def calcRoot(leafs: List):
                 node.right = parents[i + 1]
                 temp.append(node)
             else:
-                temp.append(parents[i])
+                newNode = MerkleNode("")
+                newNode.value = parents[i].value
+                newNode.left = parents[i]
+                parents[i].father = newNode
+                temp.append(newNode)
         parents = temp
         temp = []
         #print("THE LENGTH IS: " + str(len(parents)))
@@ -142,29 +146,42 @@ def createRSAKeys():
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.TraditionalOpenSSL,
         encryption_algorithm=serialization.NoEncryption())
-    print(pem)
+    print(pem.decode("UTF-8"))
 
     public_key = private_key.public_key()
     pem = public_key.public_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PublicFormat.SubjectPublicKeyInfo)
-    print(pem)
+    print(pem.decode("UTF-8"))
 
 def signRoot(key, root):
-    signature = key.sign(
-        root.value,
+    privateKey = serialization.load_pem_private_key(
+        key.encode(),
+        password=None,
+        backend=default_backend()
+    )
+
+    signature = privateKey.sign(
+        root.value.encode(),
         padding.PSS(
             mgf=padding.MGF1(hashes.SHA256()),
             salt_length=padding.PSS.MAX_LENGTH),
             hashes.SHA256())
-    signature_encode = signature.encode("UTF-8")
-    signature_base64 = base64.b64encode(signature_encode)
-    print(signature_base64)
+    print(base64.b64encode(signature).decode("utf-8"))
+
+    #signature_encode = signature.decode("UTF-8")
+    #signature_base64 = base64.b64encode(signature_encode)
+    #print(signature_base64)
     
 
 def confirmSignature(key, signature, text):
+    public_key = serialization.load_pem_public_key(
+            key.encode(),
+            backend=default_backend()
+        )
+    
     try:
-        key.verify(
+        public_key.verify(
         signature,
         text,
         padding.PSS(
@@ -173,6 +190,7 @@ def confirmSignature(key, signature, text):
         ),
         hashes.SHA256()
         )
+        
         print("True")
     except:
         print("False")
@@ -198,9 +216,21 @@ def main():
         elif (splitted[0] == "5"):
             createRSAKeys()
         elif (splitted[0] == "6"):
-            signRoot(inputText[2:], calcRoot(leafs))
+            longInput = inputText[2:] + "\n"
+            shortInput = input()
+            while shortInput != "":
+                longInput += shortInput + "\n"
+                shortInput = input()
+            signRoot(longInput, calcRoot(leafs))
         elif (splitted[0] == "7"):
-            confirmSignature(splitted[1], splitted[2], splitted[3])
+            longInput = inputText[2:] + "\n"
+            shortInput = input()
+            while shortInput != "":
+                longInput += shortInput + "\n"
+                shortInput = input()
+            signature = input()
+            verifyText = input()
+            confirmSignature(longInput, signature, verifyText)
         elif (splitted[0] == "8"):
             markLeaf()
         elif (splitted[0] == "9"):
