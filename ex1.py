@@ -1,5 +1,6 @@
 
 from typing import List
+import cryptography
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 import hashlib
@@ -182,8 +183,8 @@ def confirmSignature(key, signature, text):
     
     try:
         public_key.verify(
-        signature,
-        text,
+        base64.decodebytes(signature.encode()),
+        text.encode(),
         padding.PSS(
             mgf=padding.MGF1(hashes.SHA256()),
             salt_length=padding.PSS.MAX_LENGTH
@@ -228,9 +229,9 @@ def main():
             while shortInput != "":
                 longInput += shortInput + "\n"
                 shortInput = input()
-            signature = input()
-            verifyText = input()
-            confirmSignature(longInput, signature, verifyText)
+            signatureInput = input()
+            signatureArray = signatureInput.split(" ")
+            confirmSignature(longInput, signatureArray[0], signatureArray[1])
         elif (splitted[0] == "8"):
             markLeaf()
         elif (splitted[0] == "9"):
