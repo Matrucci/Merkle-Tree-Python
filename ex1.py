@@ -192,6 +192,12 @@ def markLeaf(sparseLeafs, leafString):
 def calcSparseRoot(sparseLeafs):
     if(len(sparseLeafs) < 1):
         return defaultCalc(256)
+    return calcChangedSparse(sparseLeafs, 0, 256, 0)
+
+
+def calcChangedSparse(sparseLeafs, lowLevel, highLevel, currentLevel):
+
+    print()
     
     
 def defaultCalc(height):
