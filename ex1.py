@@ -184,20 +184,55 @@ def confirmSignature(key, signature, text):
         print("False")
 
 # Turning a received leaf value to 1.
-def markLeaf(sparseLeafs, leafString):
+def markLeaf(sparseLeaves, leafString):
     leafNum = int(leafString, 16)
-    sparseLeafs.append(leafNum)
-    sparseLeafs.sort()
+    sparseLeaves.append(leafNum)
+    sparseLeaves.sort()
 
-def calcSparseRoot(sparseLeafs):
-    if(len(sparseLeafs) < 1):
+# Calculating the root of the sparse tree
+def calcSparseRoot(sparseLeaves):
+    #In case we did not change the original (only 0) sparse merkle tree.
+    if(len(sparseLeaves) < 1):
         return defaultCalc(256)
-    return calcChangedSparse(sparseLeafs, 0, 256, 0)
+    return calcChangedSparse(sparseLeaves, 256, 255, "")
 
 
-def calcChangedSparse(sparseLeafs, lowLevel, highLevel, currentLevel):
+def calcChangedSparse(sparseLeaves, highLevel, currentLevel, result):
+    position = 0
+    flagHigh = False
+    flagLow = False
+    # If we reached our leaves.
+    if(currentLevel == 0):
+        # If the leaf we working on is even.
+        if(sparseLeaves[0] % 2 == 0):
+            # Checking if we have both leaves that has a value of 1.
+            if len(sparseLeaves) > 1:
+                result = hashlib.sha256(("1" + "1").encode("UTF-8")).hexdigest()
+            else:
+                result = hashlib.sha256(("1" + "0").encode("UTF-8")).hexdigest()
+        else:
+            result = hashlib.sha256(("0" + "1").encode("UTF-8")).hexdigest()
+        return result
 
-    print()
+    for i in range(0, len(sparseLeaves)):
+        # We want to check if one of our array numbers is bigger than half of the number of leaves.
+        if(flagHigh == False):
+            if((2**highLevel - sparseLeaves[i]) < (2 ** currentLevel)):
+                flagHigh = True
+                position = i
+        if((2**highLevel - sparseLeaves[i]) > (2 ** currentLevel)):
+            flagLow = True
+    # If we dont have any number in our current array, that is bigger or lower than half of the current leaves, we will do a default calculation.
+    if(flagHigh == True):
+        result = result + calcChangedSparse(sparseLeaves[position:], highLevel, currentLevel - 1, result)
+    if(flagLow == True):
+        result = calcChangedSparse(sparseLeaves[0:position + 1], highLevel - 1, currentLevel - 1, result) + result
+    if (flagHigh == False):
+        result = result + defaultCalc(currentLevel)
+    if (flagLow == False):
+        result = defaultCalc(currentLevel) + result
+    result = hashlib.sha256((result).encode("UTF-8")).hexdigest()
+    return result
     
     
 def defaultCalc(height):
@@ -214,7 +249,7 @@ def wrongInput():
 
 def main():
     leafs = []
-    sparseLeafs = []
+    sparseLeaves = []
     while True:
         #Getting input.
         inputText = input()
@@ -258,10 +293,10 @@ def main():
             confirmSignature(longInput, signatureArray[0], signatureArray[1])
         #Input 8 - 
         elif (splitted[0] == "8"):
-            markLeaf(sparseLeafs, splitted[1])
+            markLeaf(sparseLeaves, splitted[1])
         #Input 9 - 
         elif (splitted[0] == "9"):
-            rootHash = calcSparseRoot(sparseLeafs)
+            rootHash = calcSparseRoot(sparseLeaves)
             print(rootHash)
         #Input 10 - 
         elif (splitted[0] == "10"):
