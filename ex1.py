@@ -220,6 +220,7 @@ def calcChangedSparse(sparseLeaves, highLevel, currentLevel, result):
             if((2**highLevel - sparseLeaves[i]) < (2 ** currentLevel)):
                 flagHigh = True
                 position = i
+                print("yes")
         if((2**highLevel - sparseLeaves[i]) > (2 ** currentLevel)):
             flagLow = True
     # If we dont have any number in our current array, that is bigger or lower than half of the current leaves, we will do a default calculation.
