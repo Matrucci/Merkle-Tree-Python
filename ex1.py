@@ -1,4 +1,4 @@
-
+#Idan Givati, 315902239, Matan Saloniko, 318570769
 from typing import List
 import cryptography
 from cryptography.hazmat.primitives import hashes
@@ -100,7 +100,7 @@ def checkPOI(leafValue, inputData):
     #Calculating the hash of the input.
     hashedValue = hashlib.sha256(leafValue.encode("UTF-8")).hexdigest()
     if len(inputData) < 3:
-        print("False")
+        #print("False")     // according to the instruction we not suppose to print anything if the input isnt correct.
         return
     #Getting the tree root from the input POI.
     root = inputData[2]
@@ -179,15 +179,28 @@ def confirmSignature(key, signature, text):
         ),
         hashes.SHA256()
         )
-        
         print("True")
     except:
         print("False")
 
-
+# Turning a received leaf value to 1.
 def markLeaf(sparseLeafs, leafString):
     leafNum = int(leafString, 16)
     sparseLeafs.append(leafNum)
+    sparseLeafs.sort()
+
+def calcSparseRoot(sparseLeafs):
+    if(len(sparseLeafs) < 1):
+        return defaultCalc(256)
+    
+    
+def defaultCalc(height):
+    if(height == 0):
+        return "0"
+    result = defaultCalc(height - 1)
+    result = hashlib.sha256((result + result).encode("UTF-8")).hexdigest()
+    return result
+
 
 #Wrong input.
 def wrongInput():
@@ -242,7 +255,7 @@ def main():
             markLeaf(sparseLeafs, splitted[1])
         #Input 9 - 
         elif (splitted[0] == "9"):
-            calcSparseRoot()
+            calcSparseRoot(sparseLeafs)
         #Input 10 - 
         elif (splitted[0] == "10"):
             createSparsePOI()
