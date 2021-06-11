@@ -255,7 +255,8 @@ def main():
             markLeaf(sparseLeafs, splitted[1])
         #Input 9 - 
         elif (splitted[0] == "9"):
-            calcSparseRoot(sparseLeafs)
+            rootHash = calcSparseRoot(sparseLeafs)
+            print(rootHash)
         #Input 10 - 
         elif (splitted[0] == "10"):
             createSparsePOI()
