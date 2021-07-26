@@ -1,4 +1,3 @@
-#Idan Givati, 315902239, Matan Saloniko, 318570769
 from typing import List
 import cryptography
 from cryptography.hazmat.primitives import hashes
